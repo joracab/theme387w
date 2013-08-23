@@ -1,0 +1,277 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2012 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * Product list toolbar
+ *
+ * @see Mage_Catalog_Block_Product_List_Toolbar
+ */
+?>
+<?php 
+$currentUrl =explode("?",Mage::getUrl('',array('_current' => true,'_use_rewrite' => true))); 
+//var_dump($this->getCollection());
+// echo $currentUrl[0];
+$getParam = Mage::app()->getRequest()->getParam('mishkysize');
+$getParam1 = Mage::app()->getRequest()->getParam('mishkytopseller');
+//$getParam2 = Mage::app()->getRequest()->getParam('mishkytopseller');
+//mishkysize
+
+?>
+
+
+
+<?php if($this->getCollection()->getSize()): ?>
+<?php //echo $this->getCollection()->getSize() ?>
+<div class="toolbar">
+    <div class="pager">
+        <p class="amount">
+            <?php if($this->getLastPageNum()>1): ?>
+                <?php echo $this->__('Items %s to %s of %s total', $this->getFirstNum(), $this->getLastNum(), $this->getTotalNum()) ?>
+            <?php else: ?>
+                <strong><?php echo $this->__('<span>%s </span>Item(s)', $this->getTotalNum()) ?></strong>
+            <?php endif; ?>
+        </p>
+
+        <div class="limiter">
+            <label><?php echo $this->__('Show') ?></label>
+            <select onchange="setLocation(this.value)">
+            <?php foreach ($this->getAvailableLimit() as  $_key=>$_limit): ?>
+                <option value="<?php echo str_replace("#%21","?",$this->getLimitUrl($_key)) ?>"<?php if($this->isLimitCurrent($_key)): ?> selected="selected"<?php endif ?>>
+                    <?php echo $_limit ?>
+                </option>
+            <?php endforeach; ?>
+            </select> 
+        </div>
+
+        <?php echo $this->getPagerHtml() ?>
+
+    </div>
+
+    <?php if( $this->isExpanded() ): ?>
+    <div class="sorter">
+        <?php if( $this->isEnabledViewSwitcher() ): ?>
+        <p class="view-mode">
+            <?php $_modes = $this->getModes(); ?>
+            <?php if($_modes && count($_modes)>1): ?>
+            <label><?php echo $this->__('View as') ?>:</label>
+            <?php foreach ($this->getModes() as $_code=>$_label): ?>
+                <?php if($this->isModeActive($_code)): ?>
+                    <strong title="<?php echo $_label ?>" class="<?php echo strtolower($_code); ?>"><?php echo $_label ?></strong>&nbsp;
+                <?php else: ?>
+                    <a href="<?php  echo str_replace("#%21","?",$this->getModeUrl($_code)) ?>" title="<?php echo $_label ?>" class="<?php echo strtolower($_code); ?>"><?php echo $_label ?></a>&nbsp;
+                <?php endif; ?>
+            <?php endforeach; ?>
+            <?php endif; ?>
+        </p>
+        <?php endif; ?>
+
+ 
+ 
+ 
+ 
+ <?php
+
+$current_category = Mage::registry('current_category');
+
+//Get vaues by attribute
+ $attr = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'mishkyrefine');
+if ($attr->usesSource()) {
+    $options = $attr->getSource()->getAllOptions(false);
+}
+
+ 
+      $collrefine = Mage::getModel('catalog/product')->getCollection();
+        $collrefine->addAttributeToSelect('mishkyrefine');
+
+
+        //filter codition
+        $collrefine->addFieldToFilter(array(
+                        array('attribute'=>'mishkyrefine','neq'=>" ")
+						
+                    ));
+					$collrefine->addCategoryFilter($current_category);
+ //$_productCollection->setPage($currentPage,$limit);
+					
+				//	print_r($collrefine);
+	$attrlist=array();
+		foreach ($collrefine as $pr)
+			{
+
+    //          echo $pr["mishkyrefine"]."<br>";
+			   $attrlist[]=$pr["mishkyrefine"];
+			}
+//listAttr($attrlist);
+
+//var_dump($attrList);
+	function listAttr($array,$arrCompare){
+	$arr=array();
+	$arr2=array();
+	//print_r($arrCompare);
+	foreach($array as $key=>$val)
+	{
+	
+    if (!in_array($val, $arr)) {
+   
+	array_push($arr,$val);
+
+		}
+		
+	}
+     //buscar valor en array compare
+	 foreach($arrCompare as $key=>$arc)
+	{
+	
+	
+	//print_r($arc);
+		foreach($arr as $key=>$val)
+		{
+		if (in_array($val,$arc)) {
+			
+			array_push($arr2,$arc);
+			
+			}
+  
+		}
+		
+	}
+	 
+	
+	return $arr2;
+	}
+	
+	
+	
+	
+	$setAttr=listAttr($attrlist,$options);
+	//echo "valor arr";
+//	print_r($setAttr);
+		?>
+
+		
+     <div class="sort-by">
+            <label><?php echo $this->__('Refine  ') ?></label>
+            <select onchange="setLocation(this.value)">
+            <option value="" selected="selected">
+                  <?php echo $this->__('Refine By') ?>
+            </option>
+	
+          	<option value="<?php echo $this->getOrder2Url('name', 'asc') ?>"<?php if($this->isOrderCurrent('name') && $this->getCurrentDirection() == 'asc'): ?> selected="selected"<?php endif; ?>>
+			Name A-Z
+			</option>
+			 
+			<option value="<?php echo $this->getOrder2Url('name', 'desc') ?>"<?php if($this->isOrderCurrent('name') && $this->getCurrentDirection() == 'desc'): ?> selected="selected"<?php endif; ?>>
+			Name Z-A
+			</option>
+		<?php	
+           foreach($setAttr as $key=>$val)
+		{
+		?>
+		<option value="<?php  echo $currentUrl[0]."?mishkyrefine=".$val['value'] ?>"<?php if($getParam2==$val['value']): ?> selected="selected"<?php endif; ?>>
+			<?php echo $val['label'];?>
+			</option>	
+			<?
+			}
+				?>
+		
+		
+            </select>
+            
+        </div>
+			
+	
+	<?php   // get all products
+        $coll = Mage::getModel('catalog/product')->getCollection();
+        $coll->addAttributeToSelect('mishkytopseller');
+
+        //filter codition
+        $coll->addFieldToFilter(array(
+                        array('attribute'=>'mishkytopseller','eq'=>"1"),
+                    ));
+
+
+    ?>
+	
+	<div class="sort-by">
+            <label><?php echo $this->__('Sort  ') ?></label>
+            <select onchange="setLocation(this.value)">
+			 <option value="" selected="selected">
+                    Select
+             </option>
+			<option value="<?php echo $this->getOrder2Url('entity_id', 'desc') ?>"<?php if($this->isOrderCurrent('entity_id') && $this->getCurrentDirection() == 'desc'): ?> selected="selected"<?php endif; ?>>
+				Newest Products
+			</option>
+			
+			<option	value="<?php   echo $currentUrl[0]."?mishkytopseller=1" ?>"<?php if($getParam1=="1"): ?> selected="selected"<?php endif; ?>>
+				Top Seller
+			</option>
+		<?php //filterby("XL"); ?>
+				<option value="<?php  echo $currentUrl[0]."?mishkysize=31" ?>"<?php if($getParam=="31"): ?> selected="selected"<?php endif; ?>>
+			Size XL
+			</option>
+				<option value="<?php  echo $currentUrl[0]."?mishkysize=32" ?>"<?php if($getParam=="32"): ?> selected="selected"<?php endif; ?>>
+			Size L
+			</option>
+			<option value="<?php  echo $currentUrl[0]."?mishkysize=33" ?>"<?php if($getParam=="33"): ?> selected="selected"<?php endif; ?>>
+			Size M
+			</option>
+			<option value="<?php  echo $currentUrl[0]."?mishkysize=35" ?>"<?php if($getParam=="35"): ?> selected="selected"<?php endif; ?>>
+			Size S
+			</option>
+			<option value="<?php  echo $currentUrl[0]."?mishkysize=34" ?>"<?php if($getParam=="34"): ?> selected="selected"<?php endif; ?>>
+			Size XS
+			</option>
+			
+            </select>
+            
+        </div>
+		
+	
+<?php //echo str_replace("#%21","?",$this->getOrderUrl('price', 'desc'))
+	?>
+	
+	<div class="sort-by">
+		
+            <label><?php echo $this->__('Search  ') ?></label>
+            <select onchange="setLocation(this.value)">
+			 <option value="" selected="selected">
+                    By Price
+                </option>
+            <option value="<?php echo str_replace("#%21","?",$this->getOrderUrl('price', 'asc')) ?>"<?php if($this->isOrderCurrent('price') && $this->getCurrentDirection() == 'asc'): ?> selected="selected"<?php endif; ?>>
+				Price - Low to High
+			</option>
+ 
+			<option value="<?php echo str_replace("#%21","?",$this->getOrderUrl('price', 'desc')) ?>"<?php if($this->isOrderCurrent('price') && $this->getCurrentDirection() == 'desc'): ?> selected="selected"<?php endif; ?>>
+				Price - High to Low
+			</option>
+            </select>
+            
+        </div>
+  
+	</div>
+    <?php endif; ?>
+</div>
+<?php endif ?>		
